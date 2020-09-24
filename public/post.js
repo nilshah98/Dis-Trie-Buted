@@ -164,11 +164,11 @@ form.addEventListener("submit", async (e) => {
     const val = ''+(BigInt(jobs)*BigInt(incentive));
 
 
-    await deposit(seriesId,incentive,publicAddress,val);
+    // await deposit(seriesId,incentive,publicAddress,val);
 
-    alert("Contract created!");
+    // alert("Contract created!");
 
-    console.log(`[INFO] Contract created at ${seriesId} by ${publicAddress} for ${incentive} for each step, total steps are ${val}`);
+    // console.log(`[INFO] Contract created at ${seriesId} by ${publicAddress} for ${incentive} for each step, total steps are ${val}`);
 
     await fetch("/addFile", {
         method: 'POST',

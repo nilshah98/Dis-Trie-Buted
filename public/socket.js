@@ -169,7 +169,9 @@ socket.on('getReward',(contractId) => {
         // get the public address
         // call the withdraw function
         const publicAddress = prompt("Enter public address to receive reward");
-        withdraw(contractId, publicAddress);
+        alert(`This is non-monetised verison, money will be transfered to ${publicAddress} soon`);
+        
+        // withdraw(contractId, publicAddress);
         getIncentive.classList.add("hide");
     })
 
