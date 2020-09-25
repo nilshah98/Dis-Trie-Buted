@@ -1,8 +1,8 @@
 // Algorithm to execute on each worker thread
 const summation = (data) => {
-
+    
     var sum = 0;
-
+    
     // sum += weight * attribute value
     sum += 85 * parseFloat(data[0]);
     sum += 10 * parseFloat(data[1]);
@@ -33,16 +33,36 @@ onmessage = (e) => {
 
         // Creating input data from certain file
         async function makeTextFileLineIterator(fileURL) {
-            const utf8Decoder = new TextDecoder('utf-8');
-            const response = await fetch(fileURL);
-            const reader = response.body.getReader();
-            let { value: chunk, done: readerDone } = await reader.read();
-            chunk = chunk ? utf8Decoder.decode(chunk) : '';
-            return chunk.split("\n");
+            const data = [];
+            const utf8Decoder = new TextDecoder("utf-8");
+            let response = await fetch(fileURL);
+            let reader = response.body.getReader();
+            let {value: chunk, done: readerDone} = await reader.read();
+            chunk = chunk ? utf8Decoder.decode(chunk) : "";
+            
+            let re = /\r\n|\n|\r/gm;
+            let startIndex = 0;
+            let result;
+            
+            for (;;) {
+                let result = re.exec(chunk);
+                if (!result) {
+                    if (readerDone) {
+                        return data;
+                    }
+                    let remainder = chunk.substr(startIndex);
+                    ({value: chunk, done: readerDone} = await reader.read());
+                    chunk = remainder + (chunk ? utf8Decoder.decode(chunk) : "");
+                    startIndex = re.lastIndex = 0;
+                    continue;
+                }
+                data.push(chunk.substring(startIndex, result.index));
+                // console.log(data);
+                startIndex = re.lastIndex;
+            }
         }
         
-        // Since reading file is async need async await, then...
-        // Also note that, reading a csv over here, as mentioned in corresponding config file
+
         makeTextFileLineIterator(e.data[2]).then((data) => {
             lines = data;
             for(var i=e.data[0]; i<Math.min(e.data[0]+e.data[1], lines.length); i++){
@@ -60,13 +80,14 @@ onmessage = (e) => {
             // Finally output message on mainThread once calculations done
             postMessage(outputData);
         })
+        
     }
     else{
         // Creating input data on your own
         for(let i=e.data[0]; i<(e.data[0] + e.data[1]); i++){
             inputData.push(i);
         }
-
+        
         // This is calculated synchronously, since single threaded
         inputData.forEach((data) => outputData.push(summation(data)))
         
